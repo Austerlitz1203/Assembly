@@ -1,0 +1,130 @@
+;变址寻址
+;[RxF+V] 或者 [RxF]+V  ,  V[RxF]
+;R可以是32位通用寄存器中任意一个，或者四个16位通用寄存器 BX、SI、DI、BP任意一个
+;F是比例因子，可为1，2，4，8
+;V可为一个数值常量，也可为一个变量
+
+;变址寻址写一段程序，求BUF中数据的和
+
+STACK SEGMENT USE16 STACK
+      DB 200 DUP(0)
+STACK ENDS
+
+SEG1 SEGMENT USE16
+BUF DD 10,20,30,40,50
+RES DD ?
+SEG1 ENDS
+
+CODE SEGMENT USE16
+    ASSUME CS:CODE
+                   SS:STACK,DS:SEG1
+STACK
+      MOV AX,SEG1
+      MOV DS,AX
+      MOV EBX,0
+      MOV EAX,0
+LP:  CMP EBX ,5
+       JGE EXIT
+       ADD EAX,BUF[EBX*4];这里体现变址寻址，而且由于是加到EAX，所以乘4
+       INC EBX
+       JMP LP
+EXIT: MOV RES,EAX
+         MOV AX,4C00H
+         INT 21H
+CODE ENDS
+         END  START
+
+
+
+;以BUF1为首地址的字节区中存放5个数据，将它们拷贝到以BUF2为首地址的字节区 
+              MOV BX,0  ;计数
+MAINP:  CMP BX,5
+              JGE EXIT
+              MOV AL,BUF1[BX]
+              MOV BUF2[BX],AL
+              INC BX
+              JMP MAINP
+EXIT:
+
+;为什么要用AL，实际上双操作数有规定，不能同时存在地址
+
+;用间接寻址实现上述拷贝，设置两个指针分别指向BUF1，BUF2，然后指针++
+             MOV SI,OFFSET BUF1
+             MOV DI,OFFSET BUF2
+             MOV CX,5
+MAINP: MOV AL,[SI]
+             MOV [DI],AL
+             INC AL
+             INC DL
+             DEC CX
+             JNZ  MAINP   ;jump  not  zero
+EXIT:
+
+
+;以BUF1为首地址的双字区中存放5个数据，将它们拷贝到以BUF2为首地址的字节区 
+              MOV BX,0  ;计数
+MAINP:  CMP BX,5
+              JGE EXIT
+              MOV EAX,BUF1[EBX*4]
+              MOV BUF2[EBX*4],EAX
+              INC BX
+              JMP MAINP
+EXIT:
+
+;变址寻址如果V是变量，要以变量为准，看变量在哪个段中间，比如：
+data segment use16
+x    db  10H,20H,30H
+x2 db 11H,22H
+data ends
+stack segment use16 stack
+y db 40H,50H
+stack ends
+code segment use16
+    assume ……
+z  db 60H,70H,80H
+……
+
+mov BX,0
+mov ah,x[BX]
+mov al,y[BX]
+mov cl,z[BX]
+;汇编后的结果：
+MOV ah,[BX]          //BX默认的是在数据段DS里面，所以这里没关系
+MOV al,SS:[BX]       //这里y是在堆栈段
+MOV cl,CS:[BX]       //z是在代码段
+
+
+
+
+;除了要看在什么段里面，还要看类型
+
+Data segment 
+x   DB 10H,20H,30H
+y   DW 1122H,3344H
+Data ends
+Code segment
+……
+Begin: ……
+   MOV BX,0
+   MOV x[BX],0
+   MOV y[BX],0
+……
+
+
+;这里x、y是不同的类型，一个是字节、一个是字
+所以原本数据段内容是
+10H
+20H
+30H
+22H
+11H
+44H
+33H
+更改之后是
+00H
+20H
+30H
+00H
+00H
+44H
+33H

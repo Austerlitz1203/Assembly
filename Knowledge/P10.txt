@@ -1,0 +1,11 @@
+;直接寻址
+;ADD AX,BX     AX代表目的操作数地址  BX代表源操作数地址
+; (AX)+(BX) -> AX     这是上面指令的过程，代表取AX和BX地址的值，相加放到AX内 
+;又比如   DEC BL       假设(BL)=43H,那么执行： (BL)-1=43H-1=42H->BL  ，执行后 (BL)=42H
+; MOV  AX，BH  就不行，因为AX、BH类型不一致
+
+实现 (AX)+(BX) -> CX
+
+MOV CX,AX
+ADD CX,BX
+

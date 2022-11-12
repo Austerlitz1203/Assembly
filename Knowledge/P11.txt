@@ -1,0 +1,42 @@
+;间接寻址
+;格式 ： [R]   R可以是32位通用寄存器中任意一个，或者四个16位通用寄存器 BX、SI、DI、BP任意一个
+; 如果R 是BP、EBP、ESP中任意一个，那么系统默认操作数在堆栈中，等同于 SS:[R]
+;其他情况下，默认操作数在DS所指示的段中
+; 例如   MOV AH,[BP]
+; 执行前 (AX)=0005H    (BP)=21H    SS:(BP)=12H       BP里面放的是地址，指向的值是12H
+;执行后  (AX)=1205H    (BP)=21H                 
+
+
+SEG1 SEGMENT USE16 STACK
+    DB 200 DUP(0)
+SEG1 ENDS
+
+SEG2 SGEMENT USE16
+BUF DB 10,20,30,40,50
+RES DB ?
+SEG2 ENDS
+
+SEG3 SEGMENT USE16
+ ASSUME CS:SEG3
+                SS:SEG1,DS:SEG2
+
+START:
+    MOV AX,SEG2
+    MOV DS,AX
+    MOV CX,0    ;计数
+    MOV  AH,0  ;和
+    MOV BX,OFFSET BUF ;现在BX里存的是BUF的偏移地址
+LP: CMP CX,5
+      JGE EXIT          ;CX>=5,JUMP到EXIT
+      ADD AH,[BX]
+      INC BX    ;因为是加到AH里面，是字节，所以BX每次+1，而如果是加到EAX，双字，BX每次要+4
+      INC CX    ;P12   11：53 有
+      JMP LP
+EXIT: MOV RES,AH
+MOV AX,4C00H
+         INT 21H
+SEG3 ENDS
+    END START
+
+
+;如果把 ADD AH,[BX] 换成 ADD AH,BX 可以吗？   不可以，一方面两个类型不同，另一方面，即使AH为;AX，和BX类型相同，但是BX代表的是地址，累加地址没啥作用，要的是累加地址单元里的内容
