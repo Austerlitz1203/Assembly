@@ -1,0 +1,65 @@
+一般而言，指令的共同要求：
+(1)双操作数的操作数类型必须匹配。
+(2)目的操作数一定不能是立即操作数。
+(3)目的操作数和源操作数不能同时为存储器操作数,如果一个操作数在数据存储单元中,另一个一定要是立即数和寄存器操作数。
+
+
+1、一般数据传送指令
+MOV   MOVSX   MOVZX    XCHG    XLAT
+XLAT   查表转换
+下面两个类似于整型提升
+MOVSX   符号扩展，比如FF是一个字节里面表示-1，然后想要扩展成字，补最高位的1，变成FFFF
+MOVZX   Z是0 的意思，比如无符号数扩展，高位补0
+
+2、堆栈操作指令
+PUSH   POP   PUSHA   PUSHAD   POPA  POPAD
+
+3、标志寄存器传送指令
+PUSHF   POPF    PUSHFD    POPFD   LAHF    SAHF
+PUSHF和PUSHFD的区别，前者存在16位，后者32位
+LAHF         load   ah，把flag的最低八位装到ah里面
+SAHF         store  ah，把ah里面的内容存到flag最低八位里面
+
+4、地址传送指令
+LEA    LDS    LES   LFS   LGS   LSS
+
+5、输入输出指令
+IN  OUT
+
+
+//看6：50处的图片
+立即数不能送段寄存器
+不能用MOV指令改变CS
+
+MOV DS,SEG BUF      错误，BUF 为变量
+MOV DS,DATA    错误，DATA 为一段名
+MOV CS,AX    错误，不能改变CS
+
+
+
+无符号数传送指令
+MOVSX
+语句格式:MOVSX OPD,OPS
+功能:将源操作数的符号向前扩展成与目的操作数相同的数据类型后,再送入目的地址对应的单元中。
+注意：
+OPS 不能为立即数
+OPD必须是16/32位的寄存器
+源操作数的位数必小于目的操作数的位数。
+
+
+查表转换指令
+XLAT
+
+
+XCHG  OPD，OPS
+两个单元里面的内容互换
+注意：不能使用段寄存器。比如，  XCHG  DS，AX；  就是错误的
+
+XCHG BUF1，BUF2； 也是错误的，两个同时是存储单元
+功能 : ([BX+AL)→AL或([EBX+AL])一>AL
+将(BX)或(EBX)为首址，(AL)为位移量的字节存储单元中的数据传送给AL。
+用BX、EBX取决于16位段还是32位段。
+
+
+
+
