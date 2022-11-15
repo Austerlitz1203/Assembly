@@ -1,0 +1,145 @@
+算术运算指令
+1、加法指令
+INC、ADD、ADC
+
+INC OPD
+（OPD）+1 -> OPD   取OPD指向的内容+1，放到OPD里面
+所以，之前的  INC  BUF  不是想象的地址+1
+
+ADD OPD,OPS
+(OPD) + (OPS) ->OPD
+例如：  
+MOV AX,0FFFDH
+ADD AX,-7FFFH
+实际上就是FFFD（补码）和8FFF1（补码）相加，之后AX结果为 7FFEH
+与此同时，OF=1   CF=1  ZF=0  SF=0。  
+ZF，值为0则ZF=1，否则=0。  
+SF，符号位为1则SF=1，7的二进制是0111，所以为0。   
+OF，溢出，两个相加数字首位之前相同，加后结果和原来数字不一样则为1。这里F和*最高位都是1，最后结果最高位是0，所以OF=1.
+CF，最高位进位则为1.
+
+ADC OPD,OPS
+(OPD)+(OPS)+CF->OPD
+CF:进位则为1，否则为0
+
+例如：计算1234 F00FH  +1234  80F0H（只允许用16位寄存器）
+
+data segment use16
+dn1  dw  0ff00h,1234h
+dn2  dw  80f0h,1234h
+dsum dw 0,0
+data ends
+code sgement
+    assume
+cs:code,ds:data
+start:mov ax, data
+        mov ds,ax
+        
+        mov ax,dn1
+        add ax,dn2
+        mov dsum,ax
+        mov ax,dn1+2
+        adc ax,dn2+2
+        mov dsum+2,ax
+
+        mov ah,4ch
+        int 21h
+code ends
+  end start
+
+dn1 dw 0ff00h,1234h的原因是，一方面按双字是高位存高位，所以1234h存后面，另一方面便于计算
+核心代码，add  ax，dn2之后，由于有进位，CF变为1；而adc加的是两个高位，同时+CF，此时CF为1，符合要求
+
+
+
+2、减法指令
+DEC、NEG、SUB、SBB、CMP
+
+NEG求补指令：
+NEG OPD；
+（OPD）求反加1 -> OPD
+
+SUB OPD，OPS
+（OPD）-（OPS) -> OPD
+写出 （B）-（A）-> B
+SUB B，A错的
+要：
+MOV BX，A
+SUB B，BX
+
+SBB OPD，OPS
+（OPD）-（OPS）-CF  -> OPD
+例如:计算1234 F00FH  -1234  80F0H（只允许用16位寄存器）
+
+CMP OPD，OPS；
+（OPD）-（OPS）
+
+
+
+3、乘法指令
+IMUL、MUL
+
+有符号乘法
+用法1： IMUL OPD，OPS
+（OPD）*（OPS）-> OPD
+OPD为16位或32位寄存器，OPS是同类型寄存器、存储器操作数或者立即数
+
+用法2： IMUL OPD，OPS，n
+(OPS）*n-> OPD
+OPD为16位或32位寄存器，OPS是同类型寄存器、存储器操作数或者立即数
+
+用法3： IMUL OPS
+字节乘法:(AL)*(OPS)->AX
+字乘法:(AX)* (OPS)-> DX,AX
+双字乘法:(EAX)*(OPS)一>EDX,EAX
+
+OPS不能是立即数
+如果乘积高位不是低位的符号扩展，而是包含有效位，则CF=1，OF=1
+
+
+无符号乘法
+MUL OPS
+字节乘法 ：(AL)*(OPS)->AX
+字乘法：    (AX)*(OPS)->DX,AX
+双字乘法： (EAX)*(OPS)->EDX,EAX
+
+
+
+无符号乘法与有符号乘法的比较
+code segment 
+    assume cs：code
+begin:
+    mov  al,10H
+    mov  bl,-2     ; (bl)=FE
+    imul   bl
+;上面代码结果   （ax）=0FFE0H，  也就是-20H.    -2x10H  结果为-20H   其中-2是10进制，10H为16进制，计算结果确实也是-20H，-20H的10进制是-32。
+-32其二进制原码是 1000 0000 0010 0000    反码是 1111 1111 1101  1111
+补码是 1111 1111 1110 0000   所以最后存储起来是FFE0，所以是0FFE0H
+
+    mov al,10H
+    mul  bl
+；上面代码运行,要把al、bl都当作无符号数看，结果是  （ax）=0FE0H     由于是mul，所以把bl当作了无符号数，那么FE无符号数表示的是255，255x16 ，然后放到ax里面
+
+mov al,-10h
+mov bl,2
+imul bl
+结果 （ax）=0FFE0H    和上面的一样。
+
+mov al,-10h
+mov bl,2
+mul bl
+结果 （ax）=01E0H，如何算的，   -10H是16进制，且是负数，按照补码运算，其补码是 EF+1=F0H
+F0H 成二进制就是 1111 0000   然后mul bl  即乘2，所以 1 1110 0000，因为乘2，在二进制看来就是左移一位，多一个0，所以最后结果是1E0，所以是01E0H
+
+
+
+
+
+
+
+
+
+
+ 
+
+ 

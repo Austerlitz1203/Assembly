@@ -1,0 +1,72 @@
+地址传送指令
+
+1、传送偏移地址指令
+语句格式:  LEA OPD,OPS
+功能:计算OPS的偏移地址，并将其送入OPD中。
+说明:OPD一定是一个16/32位的通用寄存器;OPS所提供的一定是一个存储器地址;
+如果偏移地址为32位，而OPD为16位，则取低16位一>OPD;
+如果偏移地址为16位,而OPD为32位，则高16位补0后-一>OPD
+
+DATA SEGMENT USE16
+BUF DB 'ABCDEF'
+NUM DW 72,-5,100H
+POIN DW 0
+DATA ENDS
+……
+MOV ESI,OFFSET NUM
+LEA ESI,NUM              ;这一条指令和上一条指令效果一样
+MOV AX,[ESI]            ;这条指令执行完之后，AX内容是72（10进制下）
+LEA AX,[ESI]              ；这条指令执行完之后，AX内容是6（偏移地址）
+LEA DI,[ESI+4]          ；                                                10
+
+可知 MOV ESI,OFFSET NUM   和   LEA ESI,NUM  等效
+但是比如 LEA DI,[SI+4]     找不到等效的MOV语句，因为又要传送又要加，MOV做不到
+比如 MOV POIN，OFFSET BUF也找不到等效LEA的句子，因为POIN是变量，而LEA语句要求OPD是寄存器
+
+
+
+2、传送偏移地址和数据段首址指令
+格式 LDS  OPD,OPS
+功能（OPS）->OPD，（OPD+2/4）->DS
+找到OPS地址的里的内容，放到OPD
+(1) OPD一定是一个16/32位的通用寄存器;
+(2) OPS所提供的一定是一个存储器地址,类型为DWORD/FWORD。
+
+
+DATA1 SEGMENT USE16
+T1      DW     -50H
+T2      DD      F
+T3      DB      '1234567'
+DATA1 ENDS
+DATA2 SEGMENT USE16
+BUF    DB     'ABCDEF'
+F         DW    70H
+DATA2  ENDS
+……
+START:
+MOV AX,DATA1
+MOV DS,AX
+
+MOV SI,6
+MOV AX,[SI]       执行后，AX值为3231H，是2、1的ASCLL码
+
+MOV  AX,T1        执行后，AX值为 FFB0H,-50的补码
+LDS    SI,T2         
+MOV  AX,[SI]       执行后，AX值为0070H
+这里由于T2 DD F，按照变量定义规则，T2第一个字存F偏移地址，第二个字存段首址，而AX是字类型的寄存器，所以LDS把T2第一个字给了SI，即SI存的F偏移地址，同时LDS把DATA2段首址给了DS，所以AX值是0070H
+
+MOV  AX,T1       执行后，AX值为4241H
+由于此时DS已经值DATA2段，而T1偏移地址为0，所以编译会编译成：MOV AX DS:0 。AX是4241H，42是B的ASCLL码
+
+
+
+
+
+
+
+
+
+
+
+
+
