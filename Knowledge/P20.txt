@@ -1,0 +1,79 @@
+除法指令
+IDIV   DIV
+
+1、有符号除法
+IDIV  OPS
+字节除法:    (AX)/(OPS)          ->  AL(商),AH(余)
+字除法:       (DX,AX)/(OPS)     →  AX(商),DX(余)
+双字除法:    (EDX,EAX)/(OPS) →  EAX(商),EDX
+
+2、无符号除法
+DIV OPS
+字节除法:    (AX)/(OPS)         →   AL(商),AH(余)
+字除法 :      (DX,AX)/(OPS)    →   AX(商),DX(余)
+双字除法:    (EDX,EAX)/(OPS)→   EAX(商),EDX
+
+
+符号扩展指令
+除法要扩展
+CBW  把字节扩展成字
+CWD 把字扩展成双字
+CWDE 把AX中的有符号数扩展为32位送给EAX
+CDQ 把EAX中的有符号数扩展为64位数，送EDX，EAX
+
+
+位操作指令
+1、逻辑运算指令
+NOT  OPD                ;(OPD)求反一OPD
+AND  OPD,OPS        ;(OPD)^(OPS)-OPD
+OR     OPD, OPS       ; (OPD)V(OPS)-OPD
+XOR   OPD,OPS        ;(OPD)异或(OPS)-OPD   
+
+测试指令
+TEST OPD, OPS
+功能:
+根据(OPD)^(OPS)设置标志位
+,(OPD)、(OPS)不变。
+CF=0，OF=0。 ZF、SF、PF依结果而定。
+AND、OR、XOR亦是如此。
+
+
+2、移位指令
+1)算术左移SAL       Shift Arithmetic Left
+(2)逻辑左移SHL     SHift Logical Left
+(3)逻辑右移SHR     SHift Logical Right
+(4)算术右移SAR     Shift Arithmetic Right
+(5)循环左移 ROL    Rotate Left
+(6)循环左移 ROR    Rotate Right
+(7)带进位的循环左移 RCL      Rotate left through Carry
+(8)带进位的循环右移 RCR
+
+语句格式:
+操作符     OPD,n或CL
+功能:将(OPD)中的所有位按操作符规定的方式移动，结果存在OPD对应的单元中。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
