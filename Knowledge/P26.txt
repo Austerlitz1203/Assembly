@@ -1,0 +1,94 @@
+计数控制：循环次数已知时常用
+（1）倒计数
+
+            ……
+            MOV CX，循环次数
+
+LOOPA: ……
+             ……
+             DEC    CX
+             JNE    LOOPA
+
+
+JNE，当ZF不等于0的时候执行，CX减到0，则ZF=0，那么就不执行跳转到LOOPA
+
+
+
+
+
+（2）正计数
+
+             ……
+            MOV    CX,0
+LOOPA:
+             ……
+             INC  CX
+             CMP CX,n
+             JNE  LOOPA
+
+
+
+80X86提供四种技术控制循环转移指令
+
+1、 LOOP   标号
+(CX / ECX) - 1→ CX/ ECX
+若（CX/ ECX)不为0，则转标号处执行。
+基本等价于: DEC      CX/ ECX
+                   JNZ      标号
+
+LOOP指令对标志位无影响! 就是说，用上述DEC和JNZ指令，跳出的时候ZF=0，但是LOOP不影响ZF等标志位
+
+
+2、 LOOPE /LO0PZ     标号
+ (CX / ECX) -1→CX/ ECX
+若（CX/ ECX) 不为0，且ZF=1,则转标号处执行。
+(等于或为0循环转移指令，本指令对标志位无影响)
+
+
+3、LOOPNE /L0OPNZ  标号
+(CX / ECX)-1  →  cX/ ECX
+若(CX / ECX)不为0，且ZF=0,则转标号处执行.
+
+
+4、JCXZ  标号  /  JECXZ  标号
+若(CX / ECX)为0，则转标号处执行。(先判断，后执行循环体时,可用此语句,标号为循环结束处)
+
+
+
+写一个程序，判断ax里面的值，其二进制有多少个1
+
+      MOV   CX,0   ;  CX来记载1的个数
+L:   AND   AX,AX
+      JZ       EXIT
+      SAL    AX,1
+      JNC    L            ;CF为0的时候跳转，因为CX不需要+1      
+      INC    CX
+      JMP    L
+
+EXIT:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

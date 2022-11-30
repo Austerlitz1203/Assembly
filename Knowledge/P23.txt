@@ -1,0 +1,68 @@
+if (x==y)
+{
+  
+}
+else
+{
+
+}
+
+等效为
+
+MOV AX,X
+CMP AX,Y
+
+JNE L1         ；x，y不等，那么跳到L1，相等执行下方语句
+
+……
+JMP L2        ；相等的情况，执行完上述跳到L2，else里面的不执行
+
+L1:
+
+……
+L2:
+……
+
+
+
+
+无符号数条件转移指令
+JA/JNBE    标号    （CF=0且 ZF=0，转移)
+JAE / JNB  标号      (CF=0或ZF=1，转移)
+JB/JNAE    标号      (CF=1且 ZF=0，转移)
+JBE/ JNA   标号      (CF=1或ZF=1，转移)
+
+
+CMP    AX，BX
+JA     L1
+L1:
+
+将(AX),(BX)中的数据当成无符号数，
+执行(AX)-(BX)．若(AX)>(BX)，则CF一定会为0，ZF=0，转移到L1处.
+
+
+有符号数条件转移指令
+JG/JNLE    标号       当SF=OF 且ZF=0时,转移
+JGE / JNL  标号       当SF=OF或者ZF=1时，转移
+L/JNGE      标号       当SF≠0F且ZF=0时，转移
+JLE / JNG   标号       当SF≠0F或者ZF=1时，转移
+
+
+CMP    AX，BX
+JG    L1
+……
+L1:
+
+将(AX)，(BX)中的数据当成有符号数,执行(AX)-(BX)。若(AX)>(BX)，则SF、OF会相等，ZF=0，转移到L1处。
+例1:       (AX)=1234H,(BX)=0234H
+            SF=0、0F=0，ZF=0，CF=0
+
+
+
+
+
+
+
+
+
+
